@@ -60,6 +60,12 @@ public class EnemyAI : MonoBehaviour
     public Vector2Int coinDrop = new Vector2Int(3, 8);
     [Range(0f, 1f)] public float potionDropChance = 0.08f;
 
+    [Header("Sounds (Resources/Audio/SFX names)")]
+    public string growlSound = "skeleton_growl";
+    public string attackSound = "swing";
+    public string deathSound = "skeleton_die";
+    float nextGrowl;
+
     [Header("Optional visuals")]
     public Animator animator;
     public Renderer[] flashRenderers;
@@ -249,6 +255,7 @@ public class EnemyAI : MonoBehaviour
                 break;
             case State.Chase:
                 Agent.speed = chaseSpeed;
+                if (Time.time > nextGrowl) { AudioManager.Play(growlSound, transform.position, 0.8f); nextGrowl = Time.time + 8f; }
                 break;
             case State.Search:
                 Agent.speed = patrolSpeed * 1.3f;
@@ -285,12 +292,14 @@ public class EnemyAI : MonoBehaviour
     {
         if (animator != null && animator.runtimeAnimatorController != null) animator.SetTrigger(AttackHash);
         StartCoroutine(Telegraph(attackWindup));
+        if (style != AttackStyle.Melee) AudioManager.Play(style == AttackStyle.Caster ? "mage_cast" : "swing", transform.position, 0.7f);
         yield return new WaitForSeconds(attackWindup);
         if (CurrentState != State.Attack) yield break;
 
         switch (style)
         {
             case AttackStyle.Melee:
+                AudioManager.Play(attackSound, transform.position, 0.8f);
                 hitSet.Clear();
                 Vector3 center = transform.position + Vector3.up + transform.forward * attackRange * 0.6f;
                 Combat.MeleeSweep(center, attackRadius, Team.Enemy,
@@ -363,6 +372,7 @@ public class EnemyAI : MonoBehaviour
     void OnDamaged(DamageInfo info)
     {
         if (CurrentState == State.Dead) return;
+        AudioManager.Play("hit", info.point, 0.9f);
         lastKnownPosition = Target != null ? Target.position : lastKnownPosition;
         lastSeenTime = Time.time;
         if (CurrentState == State.Idle || CurrentState == State.Patrol || CurrentState == State.Return || CurrentState == State.Search)

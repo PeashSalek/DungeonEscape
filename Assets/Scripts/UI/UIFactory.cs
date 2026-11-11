@@ -130,6 +130,7 @@ public static class UIFactory
         colors.selectedColor = new Color(1.4f, 1.2f, 0.9f);
         colors.pressedColor = new Color(0.7f, 0.6f, 0.5f);
         btn.colors = colors;
+        btn.onClick.AddListener(() => AudioManager.PlayUI("ui_click"));
         if (onClick != null) btn.onClick.AddListener(onClick);
         var t = CreateText(img.transform, "Label", label, fontSize, TextAnchor.MiddleCenter, Parchment,
             Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);

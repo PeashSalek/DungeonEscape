@@ -24,6 +24,7 @@ public class Breakable : MonoBehaviour, IDamageable
     void Break(Vector3 dir)
     {
         if (breakSound != null) AudioSource.PlayClipAtPoint(breakSound, transform.position);
+        else AudioManager.Play("wood", transform.position);
         var rend = GetComponentInChildren<Renderer>();
         Material mat = rend != null ? rend.sharedMaterial : null;
         Vector3 size = rend != null ? rend.bounds.size : Vector3.one;

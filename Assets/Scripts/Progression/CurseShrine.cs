@@ -18,6 +18,7 @@ public class CurseShrine : MonoBehaviour, IInteractable
     public void Interact(PlayerInteractor p)
     {
         if (!CanInteract(p)) return;
+        AudioManager.PlayUI("shrine", 0.8f);
         var choices = BlessingSystem.Instance.RollChoices(3);
         if (choices.Count == 0) { used = true; return; }
         Show(choices, p.Stats);

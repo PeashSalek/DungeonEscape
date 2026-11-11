@@ -6,11 +6,29 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
-    guid: 99c9720ab356a0642a771bea13969a05
+    path: Assets/Scenes/MainMenu.unity
+    guid: 02176099bdf38d44ba49c48173252206
   - enabled: 1
-    path: Assets/Scenes/Dev_Sandbox.unity
-    guid: b4d7b6cc1f0677a46b6ffa07edfceafc
+    path: Assets/Scenes/Intro.unity
+    guid: 44b825a32c79f4c41ae9fc98a3af1ca5
+  - enabled: 1
+    path: Assets/Scenes/Level01_Prison.unity
+    guid: 8381d2a303d09e340891b2c6101f87c6
+  - enabled: 1
+    path: Assets/Scenes/Interlude.unity
+    guid: f61d237d21d98b844bdc863b86593718
+  - enabled: 1
+    path: Assets/Scenes/Level02_Crypt.unity
+    guid: eebf3b0171c3e5f4da12dbc700253b5a
+  - enabled: 1
+    path: Assets/Scenes/Level03_KingsChamber.unity
+    guid: 6524b3996f0dc73418aa06c2f1fee199
+  - enabled: 1
+    path: Assets/Scenes/Trial.unity
+    guid: e6d21dd021e9bf147bb5de8b43c46917
+  - enabled: 1
+    path: Assets/Scenes/Ending.unity
+    guid: eac70762da5ad79408794e10579b0166
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

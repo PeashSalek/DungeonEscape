@@ -26,6 +26,7 @@ public class Brazier : MonoBehaviour, IInteractable
     public void Interact(PlayerInteractor p)
     {
         bool first = !IsLit;
+        AudioManager.Play("magic", transform.position);
         SetVisual(true);
         var stats = p.Stats;
         stats.Health.Heal(stats.Health.maxHealth);

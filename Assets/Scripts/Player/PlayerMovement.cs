@@ -20,9 +20,9 @@ public class PlayerMovement : MonoBehaviour
     public float jumpHeight = 1.5f;
 
     [Header("Dodge")]
-    public float dodgeSpeed = 11f;
-    public float dodgeDuration = 0.4f;
-    public float dodgeInvulnerability = 0.35f;
+    public float dodgeSpeed = 9f;
+    public float dodgeDuration = 0.6f;
+    public float dodgeInvulnerability = 0.45f;
     public float dodgeCooldown = 0.25f;
 
     [Header("Visuals (optional)")]
@@ -115,6 +115,7 @@ public class PlayerMovement : MonoBehaviour
         transform.rotation = Quaternion.LookRotation(dodgeDirection);
         MovementLocked = false;
         if (animator != null) animator.SetTrigger(DodgeHash);
+        AudioManager.Play("dodge", transform.position, 0.7f);
     }
 
     void HandleMovement()

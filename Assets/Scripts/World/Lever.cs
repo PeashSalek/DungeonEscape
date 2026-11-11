@@ -17,6 +17,7 @@ public class Lever : MonoBehaviour, IInteractable
         if (pulled) return;
         pulled = true;
         if (pullSound != null) AudioSource.PlayClipAtPoint(pullSound, transform.position);
+        else AudioManager.Play("lever", transform.position);
         if (handle != null) StartCoroutine(Pull());
         foreach (var d in targets) if (d != null) d.Open();
         GameEvents.Notify("Somewhere, a gate grinds open...");

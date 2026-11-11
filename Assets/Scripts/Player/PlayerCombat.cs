@@ -24,11 +24,12 @@ public class PlayerCombat : MonoBehaviour
 
     public AttackData[] lightCombo =
     {
-        new AttackData(),
-        new AttackData { windup = 0.1f, active = 0.14f, recovery = 0.22f },
-        new AttackData { windup = 0.18f, active = 0.16f, recovery = 0.35f, radius = 1.3f, knockback = 0.8f },
+        // Timings match the Quaternius sword clips (Sword_Regular_A/B/C).
+        new AttackData { windup = 0.12f, active = 0.12f, recovery = 0.19f },
+        new AttackData { windup = 0.14f, active = 0.12f, recovery = 0.27f },
+        new AttackData { windup = 0.45f, active = 0.2f, recovery = 0.45f, radius = 1.3f, knockback = 0.8f },
     };
-    public AttackData heavy = new AttackData { windup = 0.45f, active = 0.18f, recovery = 0.45f, range = 1.8f, radius = 1.5f, knockback = 1.5f, forwardStep = 2.5f };
+    public AttackData heavy = new AttackData { windup = 0.55f, active = 0.2f, recovery = 0.55f, range = 1.8f, radius = 1.5f, knockback = 1.5f, forwardStep = 2.5f };
 
     [Tooltip("Time after an attack in which the next combo input is accepted.")]
     public float comboWindow = 0.45f;
@@ -59,6 +60,7 @@ public class PlayerCombat : MonoBehaviour
     static readonly int HeavyHash = Animator.StringToHash("HeavyAttack");
     static readonly int HitHash = Animator.StringToHash("Hit");
     static readonly int DieHash = Animator.StringToHash("Die");
+    static readonly int ConsumeHash = Animator.StringToHash("Consume");
 
     public event System.Action<Health> HitEnemy;
 
@@ -89,8 +91,9 @@ public class PlayerCombat : MonoBehaviour
 
         HandleLockOn();
 
-        if (GameInput.UsePotion.WasPressedThisFrame() && !IsAttacking)
-            stats.UsePotion();
+        if (GameInput.UsePotion.WasPressedThisFrame() && !IsAttacking && stats.UsePotion()
+            && animator != null && animator.runtimeAnimatorController != null)
+            animator.SetTrigger(ConsumeHash);
 
         if (Time.time < stunnedUntil || movement.IsDodging) return;
 
@@ -134,6 +137,7 @@ public class PlayerCombat : MonoBehaviour
         float total = data.windup + data.active + data.recovery;
         float t = 0f;
         bool swung = false;
+        bool swingSoundPlayed = false;
         while (t < total)
         {
             if (health.IsDead) break;
@@ -146,6 +150,11 @@ public class PlayerCombat : MonoBehaviour
 
             AnimateWeapon(t / total, isHeavy);
 
+            if (t >= data.windup && !swingSoundPlayed)
+            {
+                swingSoundPlayed = true;
+                AudioManager.Play("swing", transform.position, isHeavy ? 1f : 0.8f, isHeavy ? 0.02f : 0.1f);
+            }
             if (t >= data.windup && t <= data.windup + data.active)
             {
                 Vector3 center = transform.position + Vector3.up * 1f + transform.forward * data.range * 0.6f;
@@ -262,6 +271,8 @@ public class PlayerCombat : MonoBehaviour
         movement.MovementLocked = false;
         AnimateWeapon(0f, false);
         stunnedUntil = Time.time + hitStunTime;
+        AudioManager.Play("armor", transform.position, 0.9f);
+        if (ThirdPersonCamera.Instance != null) ThirdPersonCamera.Instance.Shake(info.heavy ? 0.25f : 0.12f, 0.2f);
         if (animator != null && animator.runtimeAnimatorController != null) animator.SetTrigger(HitHash);
     }
 

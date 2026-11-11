@@ -118,6 +118,7 @@ public class Pickup : MonoBehaviour
         if (Time.time - spawnTime < 0.3f && type == PickupType.Coin) return;
         if (!Apply(stats)) return;
         if (pickupSound != null) AudioSource.PlayClipAtPoint(pickupSound, transform.position, 0.7f);
+        else AudioManager.Play(type == PickupType.Coin ? "coin" : type == PickupType.Potion ? "potion" : type == PickupType.Key ? "key" : "magic", transform.position, 0.7f);
         Destroy(gameObject);
     }
 

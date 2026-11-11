@@ -53,16 +53,51 @@ public class Door : MonoBehaviour, IInteractable
         if (IsOpen) return;
         IsOpen = true;
         if (openSound != null) AudioSource.PlayClipAtPoint(openSound, transform.position);
+        else AudioManager.Play("door", transform.position);
         StartCoroutine(Animate());
     }
 
-    IEnumerator Animate()
+    /// <summary>Close an open door again (boss arenas seal behind the player).</summary>
+    public void Close()
+    {
+        if (!IsOpen) return;
+        IsOpen = false;
+        StopAllCoroutines();
+        StartCoroutine(Animate(true));
+        var obstacle = GetComponentInChildren<UnityEngine.AI.NavMeshObstacle>();
+        if (obstacle != null) obstacle.enabled = true;
+        AudioManager.Play("door", transform.position);
+    }
+
+    public bool startOpen = false;
+    Vector3 closedPos; Quaternion closedRot; bool cached;
+
+    void Awake()
     {
         Transform part = movingPart != null ? movingPart : transform;
+        closedPos = part.localPosition; closedRot = part.localRotation; cached = true;
+        if (startOpen)
+        {
+            IsOpen = true;
+            if (slideDown) part.localPosition = closedPos + Vector3.down * slideDistance;
+            else part.localRotation = closedRot * Quaternion.Euler(0f, openAngle, 0f);
+            var obstacle = GetComponentInChildren<UnityEngine.AI.NavMeshObstacle>();
+            if (obstacle != null) obstacle.enabled = false;
+        }
+    }
+
+    IEnumerator Animate() => Animate(false);
+
+    IEnumerator Animate(bool closing)
+    {
+        Transform part = movingPart != null ? movingPart : transform;
+        if (!cached) { closedPos = part.localPosition; closedRot = part.localRotation; cached = true; }
+        Vector3 openPos = closedPos + Vector3.down * slideDistance;
+        Quaternion openRot = closedRot * Quaternion.Euler(0f, openAngle, 0f);
         Vector3 startPos = part.localPosition;
         Quaternion startRot = part.localRotation;
-        Vector3 endPos = startPos + Vector3.down * slideDistance;
-        Quaternion endRot = startRot * Quaternion.Euler(0f, openAngle, 0f);
+        Vector3 endPos = closing ? closedPos : openPos;
+        Quaternion endRot = closing ? closedRot : openRot;
         float t = 0f;
         while (t < 1f)
         {
@@ -73,8 +108,11 @@ public class Door : MonoBehaviour, IInteractable
             yield return null;
         }
         // Opened gates should not block the NavMesh path either.
-        var obstacle = GetComponentInChildren<UnityEngine.AI.NavMeshObstacle>();
-        if (obstacle != null) obstacle.enabled = false;
+        if (!closing)
+        {
+            var obstacle = GetComponentInChildren<UnityEngine.AI.NavMeshObstacle>();
+            if (obstacle != null) obstacle.enabled = false;
+        }
     }
 }
 

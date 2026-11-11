@@ -49,6 +49,7 @@ public class Chest : MonoBehaviour, IInteractable
         if (IsOpen) return;
         IsOpen = true;
         if (openSound != null) AudioSource.PlayClipAtPoint(openSound, transform.position);
+        else AudioManager.Play("door", transform.position, 0.8f);
         StartCoroutine(OpenRoutine());
     }
 

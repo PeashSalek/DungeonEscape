@@ -110,6 +110,7 @@ public class PlayerStats : MonoBehaviour
         if (potions <= 0 || Health.IsDead || Health.CurrentHealth >= Health.maxHealth) return false;
         potions--;
         Health.Heal(Health.maxHealth * potionHealFraction * potionMultiplier);
+        AudioManager.Play("bubble", transform.position, 0.8f);
         Changed?.Invoke();
         return true;
     }
