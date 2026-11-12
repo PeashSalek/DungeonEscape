@@ -191,7 +191,7 @@ public static class GameAssets
 
     // ------------------------------------------------------------ prefabs
 
-    public static Material Steel => Solid("Steel", new Color(0.72f, 0.74f, 0.78f), null, 0.75f, 0.9f);
+    public static Material Steel => Solid("Steel", new Color(0.62f, 0.62f, 0.64f), null, 0.5f, 0.45f);
     public static Material Gold => Solid("Gold", new Color(0.8f, 0.6f, 0.2f), null, 0.6f, 1f);
     public static Material DarkIron => Solid("DarkIron", new Color(0.18f, 0.18f, 0.2f), null, 0.4f, 0.8f);
 
@@ -208,7 +208,9 @@ public static class GameAssets
         root.AddComponent<PlayerInteractor>();
         root.AddComponent<PowerUps>();
 
-        var knightAsset = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Models/Player/Knight.fbx");
+        // Prefer the textured import in Assets/Characters/Knight; the old Models/Player copy has no materials.
+        var knightAsset = AssetDatabase.IsValidFolder("Assets/Characters/Knight") ? null
+            : AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Models/Player/Knight.fbx");
         GameObject model;
         if (knightAsset != null)
         {
@@ -219,7 +221,13 @@ public static class GameAssets
             anim.applyRootMotion = false;
             anim.runtimeAnimatorController = AnimatorFactory.Load("Player");
         }
-        else model = AddModel(root.transform, "Knight", "Player", 1.8f, Color.gray, "Knight");
+        else
+        {
+            model = AddModel(root.transform, "Knight", "Player", 1.8f, Color.gray, "Knight");
+            model.name = "Knight";
+            var knightAnim = model.GetComponentInChildren<Animator>();
+            if (knightAnim != null) knightAnim.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+        }
         AttachSword(model, 0.9f, Steel, Gold);
         // Soft light that follows the knight so he stays readable in dark rooms.
         var lamp = new GameObject("PlayerLight").AddComponent<Light>();
@@ -270,7 +278,7 @@ public static class GameAssets
     }
 
     public static GameObject BossPrefab(string name, string title, string type, string controller, float hp, float height, Color tint,
-        Projectile orb, GameObject[] summons, float speed)
+        Projectile orb, GameObject[] summons, float speed, string modelType = null, Color? recolor = null, Color? glow = null)
     {
         Directory.CreateDirectory(PrefabDir + "/Enemies");
         var root = new GameObject(name);
@@ -279,8 +287,9 @@ public static class GameAssets
         var agent = root.AddComponent<NavMeshAgent>();
         agent.radius = 0.7f; agent.height = height; agent.angularSpeed = 300f; agent.acceleration = 10f; agent.stoppingDistance = 2f;
         root.AddComponent<Health>().maxHealth = hp;
-        var model = AddModel(root.transform, type, controller, height, tint, type, out bool placeholder);
-        if (placeholder) AttachSword(model, 1.6f, Gold, DarkIron);
+        var model = AddModel(root.transform, modelType ?? type, controller, height, tint, type, out bool placeholder);
+        if (!placeholder && recolor.HasValue) Recolor(model, type, recolor.Value, glow ?? Color.black);
+        if (placeholder || modelType != null) AttachSword(model, 1.6f, Gold, DarkIron);
         var boss = root.AddComponent<BossAI>();
         boss.bossTitle = title;
         boss.orbPrefab = orb;
@@ -291,6 +300,36 @@ public static class GameAssets
         var prefab = PrefabUtility.SaveAsPrefabAsset(root, $"{PrefabDir}/Enemies/{type}.prefab");
         Object.DestroyImmediate(root);
         return prefab;
+    }
+
+    /// <summary>Gives a reused model its own tinted, glowing copies of its materials so it looks distinct.</summary>
+    static void Recolor(GameObject model, string prefix, Color tint, Color glow)
+    {
+        string dir = MatDir + "/" + prefix;
+        Directory.CreateDirectory(dir);
+        var copies = new Dictionary<Material, Material>();
+        foreach (var r in model.GetComponentsInChildren<Renderer>(true))
+        {
+            var arr = r.sharedMaterials;
+            for (int i = 0; i < arr.Length; i++)
+            {
+                var src = arr[i];
+                if (src == null) continue;
+                if (!copies.TryGetValue(src, out var copy))
+                {
+                    string path = dir + "/" + prefix + "_" + src.name.Replace("/", "_") + ".mat";
+                    AssetDatabase.DeleteAsset(path);
+                    copy = new Material(src);
+                    if (copy.HasProperty("_BaseColor")) copy.SetColor("_BaseColor", src.GetColor("_BaseColor") * tint);
+                    copy.EnableKeyword("_EMISSION");
+                    if (copy.HasProperty("_EmissionColor")) copy.SetColor("_EmissionColor", glow);
+                    AssetDatabase.CreateAsset(copy, path);
+                    copies[src] = copy;
+                }
+                arr[i] = copy;
+            }
+            r.sharedMaterials = arr;
+        }
     }
 
     public static Projectile ProjectilePrefab(string name, Vector3 scale, Material mat, float speed, float homing, PrimitiveType shape, Color? light)
@@ -325,21 +364,42 @@ public static class GameAssets
 
         var bone = new Color(0.82f, 0.78f, 0.66f);
         EnemyPrefab(new EnemySpec { name = "Skeleton Warrior", type = "SkeletonWarrior", controller = "SkeletonWarrior", style = EnemyAI.AttackStyle.Melee, hp = 60, tint = bone,
-            tune = ai => { ai.attackDamage = 12; ai.attackWindup = 0.55f; ai.attackCooldown = 1.3f; } });
+            tune = ai => { ai.attackDamage = 11; ai.attackWindup = 0.6f; ai.attackCooldown = 1.4f; } });
         EnemyPrefab(new EnemySpec { name = "Skeleton Archer", type = "SkeletonArcher", controller = "SkeletonArcher", style = EnemyAI.AttackStyle.Ranged, hp = 40, tint = new Color(0.7f, 0.68f, 0.55f), projectile = arrow, sword = false,
-            tune = ai => { ai.attackRange = 13; ai.preferredDistance = 9; ai.attackDamage = 10; ai.attackWindup = 0.8f; ai.attackCooldown = 1.8f; } });
+            tune = ai => { ai.attackRange = 13; ai.preferredDistance = 9; ai.attackDamage = 9; ai.attackWindup = 0.85f; ai.attackCooldown = 2.2f; } });
         EnemyPrefab(new EnemySpec { name = "Dark Mage", type = "DarkMage", controller = "DarkMage", style = EnemyAI.AttackStyle.Caster, hp = 45, tint = new Color(0.22f, 0.1f, 0.3f), projectile = orb, sword = false, growl = "mage_cast", death = "skeleton_die",
-            tune = ai => { ai.attackRange = 14; ai.preferredDistance = 10; ai.attackDamage = 14; ai.attackWindup = 1f; ai.attackCooldown = 2.4f; ai.chaseSpeed = 3f; ai.coinDrop = new Vector2Int(6, 12); } });
+            tune = ai => { ai.attackRange = 14; ai.preferredDistance = 10; ai.attackDamage = 12; ai.attackWindup = 1f; ai.attackCooldown = 2.6f; ai.chaseSpeed = 3f; ai.coinDrop = new Vector2Int(6, 12); } });
         EnemyPrefab(new EnemySpec { name = "Cursed Brute", type = "CursedBrute", controller = "CursedBrute", style = EnemyAI.AttackStyle.Melee, hp = 170, height = 2.4f, radius = 0.6f, tint = new Color(0.35f, 0.38f, 0.25f), sword = false, growl = "brute_growl", death = "brute_die",
-            tune = ai => { ai.attackDamage = 26; ai.attackWindup = 0.9f; ai.heavyAttack = true; ai.chaseSpeed = 2.8f; ai.poiseHits = 5; ai.attackRadius = 1.6f; ai.attackRange = 2.5f; ai.coinDrop = new Vector2Int(15, 25); ai.potionDropChance = 0.3f; } });
-        var horror = EnemyPrefab(new EnemySpec { name = "The Chained Horror", type = "ChainedHorror", controller = "ChainedHorror", style = EnemyAI.AttackStyle.Melee, hp = 220, height = 2.6f, radius = 0.6f, tint = new Color(0.4f, 0.18f, 0.18f), sword = false, growl = "horror_growl", death = "horror_die",
+            tune = ai => { ai.attackDamage = 22; ai.attackWindup = 0.95f; ai.heavyAttack = true; ai.chaseSpeed = 2.8f; ai.poiseHits = 5; ai.attackRadius = 1.6f; ai.attackRange = 2.5f; ai.coinDrop = new Vector2Int(15, 25); ai.potionDropChance = 0.3f; } });
+        var horror = EnemyPrefab(new EnemySpec { name = "The Chained Horror", type = "ChainedHorror", controller = "ChainedHorror", style = EnemyAI.AttackStyle.Melee, hp = 180, height = 2.6f, radius = 0.6f, tint = new Color(0.4f, 0.18f, 0.18f), sword = false, growl = "horror_growl", death = "horror_die",
             tune = ai => { ai.attackDamage = 24; ai.attackWindup = 0.8f; ai.heavyAttack = true; ai.chaseSpeed = 3.4f; ai.poiseHits = 6; ai.attackRadius = 1.7f; ai.attackRange = 2.6f; ai.sightRange = 40; ai.hearingRange = 40; } });
         var warrior = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabDir + "/Enemies/SkeletonWarrior.prefab");
 
-        BossPrefab("The Forgotten King", "Malgrath, the Forgotten King", "ForgottenKing", "ForgottenKing", 650, 2.9f, new Color(0.45f, 0.38f, 0.3f), kingOrb,
-            new[] { horror, warrior, warrior }, 3.2f);
+        BossPrefab("The Forgotten King", "Malgrath, the Forgotten King", "ForgottenKing", "ForgottenKing", 600, 2.9f, new Color(0.45f, 0.38f, 0.3f), kingOrb,
+            new[] { horror, warrior }, 3.2f);
         BossPrefab("The Overlord", "The Overlord, Champion of the Trial", "Overlord", "Overlord", 500, 2.7f, new Color(0.15f, 0.13f, 0.13f), kingOrb,
-            new[] { warrior, warrior }, 3.5f);
+            new[] { warrior, warrior }, 3.5f, "DarkMage", new Color(0.75f, 0.35f, 0.32f), new Color(0.35f, 0.02f, 0.02f));
+
+        // Additive particle material for hit sparks (loaded at runtime from Resources).
+        System.IO.Directory.CreateDirectory("Assets/Resources/FX");
+        var spark = AssetDatabase.LoadAssetAtPath<Material>("Assets/Resources/FX/SparkMat.mat");
+        if (spark == null)
+        {
+            var sh = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+            if (sh != null)
+            {
+                spark = new Material(sh);
+                spark.SetFloat("_Surface", 1f);
+                spark.SetFloat("_Blend", 2f);
+                spark.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.One);
+                spark.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.One);
+                spark.SetFloat("_ZWrite", 0f);
+                spark.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+                spark.renderQueue = 3000;
+                spark.SetColor("_BaseColor", Color.white);
+                AssetDatabase.CreateAsset(spark, "Assets/Resources/FX/SparkMat.mat");
+            }
+        }
 
         // Shrine prefab for the Trial
         var shrine = BuildShrine(Vector3.zero, Quaternion.identity);

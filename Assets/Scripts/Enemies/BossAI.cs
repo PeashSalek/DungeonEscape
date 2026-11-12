@@ -17,8 +17,8 @@ public class BossAI : MonoBehaviour
     public float moveSpeed = 3.2f;
     public float phase2SpeedMultiplier = 1.3f;
     public float meleeRange = 3f;
-    public float comboDamage = 14f;
-    public float slamDamage = 30f;
+    public float comboDamage = 12f;
+    public float slamDamage = 26f;
     public float slamRadius = 4.5f;
     public float chargeDamage = 22f;
     public float chargeSpeed = 14f;

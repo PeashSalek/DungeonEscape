@@ -50,6 +50,7 @@ public class PlayerMovement : MonoBehaviour
     Vector3 dodgeDirection;
     float dodgeEndTime;
     float nextDodgeTime;
+    float strideTravel;
 
     static readonly int SpeedHash = Animator.StringToHash("Speed");
     static readonly int GroundedHash = Animator.StringToHash("Grounded");
@@ -164,6 +165,23 @@ public class PlayerMovement : MonoBehaviour
 
         Velocity = move;
         controller.Move(move * Time.deltaTime);
+
+        // Footsteps: one step sound every stride while walking on the ground.
+        if (controller.isGrounded && !IsDodging)
+        {
+            Vector3 flat = move; flat.y = 0f;
+            float speed = flat.magnitude;
+            if (speed > 0.5f)
+            {
+                strideTravel += speed * Time.deltaTime;
+                float stride = speed > walkSpeed + 0.5f ? 2.3f : 1.7f;
+                if (strideTravel >= stride)
+                {
+                    strideTravel = 0f;
+                    AudioManager.Play("step", transform.position, speed > walkSpeed + 0.5f ? 0.55f : 0.4f, 0.12f);
+                }
+            }
+        }
     }
 
     void HandleJump()

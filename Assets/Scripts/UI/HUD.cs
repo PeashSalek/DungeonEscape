@@ -17,7 +17,9 @@ public class HUD : MonoBehaviour
     PowerUps powerUps;
 
     Image healthFill, healthLag, staminaFill, targetFill, bossFill;
-    Text coinsText, potionsText, lockpickText, keysText, promptText, noticeText, targetName, bossName, buffText, deathText;
+    Text coinsText, potionsText, lockpickText, keysText, promptText, noticeText, targetName, bossName, buffText, deathText, hintText;
+    Image hintBg;
+    float hintUntil;
     GameObject targetRoot, bossRoot, deathRoot;
     Health boss;
     readonly Queue<string> notices = new Queue<string>();
@@ -72,6 +74,12 @@ public class HUD : MonoBehaviour
         // Interaction prompt + notifications
         promptText = UIFactory.CreateText(root, "Prompt", "", 30, TextAnchor.MiddleCenter, UIFactory.Parchment, bc, bc, bc, new Vector2(0, 170), new Vector2(900, 50));
         noticeText = UIFactory.CreateText(root, "Notice", "", 34, TextAnchor.MiddleCenter, UIFactory.Gold, tc, tc, tc, new Vector2(0, -170), new Vector2(1200, 50));
+
+        // Tutorial hint box (above the interaction prompt)
+        hintBg = UIFactory.CreateImage(root, "HintBox", new Color(0, 0, 0, 0.6f), bc, bc, bc, new Vector2(0, 230), new Vector2(1100, 80));
+        hintBg.gameObject.AddComponent<Outline>().effectColor = new Color(0.7f, 0.55f, 0.3f, 0.6f);
+        hintText = UIFactory.CreateText(hintBg.transform, "Hint", "", 28, TextAnchor.MiddleCenter, UIFactory.Parchment, Vector2.zero, Vector2.one, c, Vector2.zero, new Vector2(-30, -10));
+        hintBg.gameObject.SetActive(false);
 
         // Lock-on target
         targetRoot = new GameObject("Target", typeof(RectTransform));
@@ -140,6 +148,8 @@ public class HUD : MonoBehaviour
             if (boss.IsDead) bossRoot.SetActive(false);
         }
 
+        if (hintBg.gameObject.activeSelf && Time.unscaledTime > hintUntil) hintBg.gameObject.SetActive(false);
+
         if (Time.unscaledTime > noticeUntil)
         {
             if (notices.Count > 0) { noticeText.text = notices.Dequeue(); noticeUntil = Time.unscaledTime + 2.5f; }
@@ -152,6 +162,14 @@ public class HUD : MonoBehaviour
         if (string.IsNullOrEmpty(msg)) return;
         if (notices.Count > 4) notices.Dequeue();
         notices.Enqueue(msg);
+    }
+
+    public void ShowHint(string text, float seconds)
+    {
+        hintText.text = text;
+        hintBg.gameObject.SetActive(true);
+        hintUntil = Time.unscaledTime + seconds;
+        AudioManager.PlayUI("ui_select", 0.4f);
     }
 
     public void ShowBoss(Health bossHealth, string title)

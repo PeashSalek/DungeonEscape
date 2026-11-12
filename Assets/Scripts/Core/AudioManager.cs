@@ -39,6 +39,7 @@ public class AudioManager : MonoBehaviour
         SceneManager.sceneLoaded += (s, mode) => OnScene(s.name);
 
         GameEvents.EnemyKilled += e => Play(e.deathSound, e.transform.position);
+        for (int i = 1; i <= 4; i++) cache["step" + i] = MakeStep(i);
         GameEvents.PlayerDied += () => PlayUI("brute_die", 0.6f);
     }
 
@@ -46,6 +47,27 @@ public class AudioManager : MonoBehaviour
     {
         if (scene == GameFlow.MainMenu || scene == GameFlow.Interlude || scene == GameFlow.Intro || scene == GameFlow.Ending) PlayMusic("ambience");
         else PlayMusic("explore");
+    }
+
+    /// <summary>Procedural footstep on stone: a short filtered noise thump (no audio file needed).</summary>
+    static AudioClip MakeStep(int seed)
+    {
+        int rate = 44100, len = (int)(rate * 0.11f);
+        var data = new float[len];
+        var rng = new System.Random(seed * 7919);
+        float lp = 0f, lp2 = 0f;
+        for (int i = 0; i < len; i++)
+        {
+            float t = (float)i / rate;
+            float noise = (float)(rng.NextDouble() * 2 - 1);
+            lp += (noise - lp) * 0.18f;          // low-pass: scuff
+            lp2 += (lp - lp2) * 0.35f;
+            float thump = Mathf.Sin(2 * Mathf.PI * (70f + seed * 6f) * t) * Mathf.Exp(-t * 55f);
+            data[i] = (lp2 * 1.6f * Mathf.Exp(-t * 38f) + thump * 0.7f) * 0.8f;
+        }
+        var clip = AudioClip.Create("step" + seed, len, 1, rate, false);
+        clip.SetData(data, 0);
+        return clip;
     }
 
     public AudioClip Get(string name)

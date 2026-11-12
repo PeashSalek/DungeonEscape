@@ -94,6 +94,17 @@ public static class DungeonBuilder
     {
         var l = new Level { scene = GameFlow.Prison, title = "THE PRISON", subtitle = "Find a way out of the cells", map = LevelMaps.Prison, keyId = "prison_key", keyName = "Jailer's Key" };
         Begin(l);
+        // Tutorial hints (row, column, size in cells, text).
+        Hint(1, 1, 2, "Move with {Move} and look around with the mouse. Hold {Sprint} to sprint, {Jump} to jump.");
+        Hint(2, 3, 1, "Press {Interact} to open doors.");
+        Hint(2, 6, 2, "Attack with {LightAttack} - press again for a 3-hit combo. {HeavyAttack} is a slow, heavy blow. {LockOn} locks on to an enemy.");
+        Hint(4, 7, 1, "Light braziers with {Interact} to save your progress and heal. Drink a potion with {UsePotion}.");
+        Hint(6, 6, 1, "Locked doors need a key. Search the side cells.");
+        Hint(9, 6, 1, "Smash barrels for coins. Coins buy upgrades from the Ghost Merchant.");
+        Hint(10, 5, 1, "Locked chests need lockpicks: press {Interact} when the pick is in the gold zone.");
+        Hint(3, 13, 1, "{Dodge} rolls - you can't be hurt mid-roll. Time it to cross the spikes!");
+        Hint(4, 20, 1, "Levers open gates elsewhere in the dungeon.");
+        Hint(6, 19, 1, "Pray at the curse shrine with {Interact}: every blessing has a price. The exit lies beyond.");
         Finish();
     }
 
@@ -124,8 +135,7 @@ public static class DungeonBuilder
         var boss = Place(bossPrefab, bossPoint.position, Quaternion.Euler(0, -90, 0));
         var bossAI = boss.GetComponent<BossAI>();
         bossAI.summonPoints = spawnPoints.ToArray();
-        var throne = GameAssets.Child(entities, PrimitiveType.Cube, "Throne", bossPoint.position + new Vector3(7, 1.5f, 0), new Vector3(2, 3, 2.5f),
-            GameAssets.Solid("ThroneGold", new Color(0.4f, 0.3f, 0.12f), null, 0.6f, 0.9f), true);
+        BuildThrone(bossPoint.position + new Vector3(7, 0, 0));
         var arena = new GameObject("BossArena").AddComponent<BoxCollider>();
         arena.transform.SetParent(entities);
         arena.transform.position = arenaGate.transform.position + new Vector3(Cell * 1.5f, 2, 0);
@@ -293,7 +303,7 @@ public static class DungeonBuilder
         var t = level.theme;
         RenderSettings.skybox = null;
         RenderSettings.ambientMode = AmbientMode.Flat;
-        RenderSettings.ambientLight = t.ambient;
+        RenderSettings.ambientLight = t.ambient * 1.55f;
         RenderSettings.fog = true;
         RenderSettings.fogMode = FogMode.ExponentialSquared;
         RenderSettings.fogColor = t.fog;
@@ -363,6 +373,17 @@ public static class DungeonBuilder
         string path = SceneDir + "/" + current.scene + ".unity";
         EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), path);
         Debug.Log("[DungeonBuilder] Saved " + path);
+    }
+
+    static void Hint(int r, int c, int cells, string text)
+    {
+        var go = new GameObject("TutorialHint");
+        go.transform.SetParent(entities);
+        go.transform.position = CellPos(r, c) + new Vector3((cells - 1) * Cell * 0.5f, 1.5f, -(cells - 1) * Cell * 0.5f);
+        var box = go.AddComponent<BoxCollider>();
+        box.isTrigger = true;
+        box.size = new Vector3(Cell * cells, 3f, Cell * cells);
+        go.AddComponent<TutorialHint>().message = text;
     }
 
     /// <summary>Removes gameplay scripts (in dependency-safe order) so a character can be scenery.</summary>
@@ -442,7 +463,7 @@ public static class DungeonBuilder
             var bloom = profile.Add<Bloom>(true); bloom.intensity.Override(0.8f); bloom.threshold.Override(1.0f);
             var vig = profile.Add<Vignette>(true); vig.intensity.Override(0.38f); vig.smoothness.Override(0.45f);
             var tone = profile.Add<Tonemapping>(true); tone.mode.Override(TonemappingMode.ACES);
-            var ca = profile.Add<ColorAdjustments>(true); ca.postExposure.Override(0.7f); ca.contrast.Override(12f); ca.saturation.Override(-8f);
+            var ca = profile.Add<ColorAdjustments>(true); ca.postExposure.Override(1.0f); ca.contrast.Override(12f); ca.saturation.Override(-8f);
             foreach (var c in profile.components) AssetDatabase.AddObjectToAsset(c, profile);
             EditorUtility.SetDirty(profile);
             AssetDatabase.SaveAssets();
@@ -765,6 +786,43 @@ public static class DungeonBuilder
             GameAssets.Child(pivot, PrimitiveType.Cube, "Blade", new Vector3(0, -3.8f, 0), new Vector3(1.6f, 0.5f, 0.06f), GameAssets.Steel, false);
             hz.bladePivot = pivot;
             hz.damage = 22f; hz.knockback = 2f; hz.damageInterval = 0.8f;
+        }
+    }
+
+    /// <summary>A stepped dais with a high-backed gold throne, facing -X (towards the arena gate).</summary>
+    static void BuildThrone(Vector3 basePos)
+    {
+        var root = new GameObject("Throne").transform;
+        root.SetParent(entities, false);
+        root.position = basePos;
+        var stone = GameAssets.Textured("ThroneStone", "marble_01", new Vector2(1, 1), new Color(0.35f, 0.33f, 0.36f), 0.5f);
+        var gold = GameAssets.Solid("ThroneGold", new Color(0.55f, 0.4f, 0.14f), new Color(0.05f, 0.03f, 0f), 0.75f, 1f);
+        var velvet = GameAssets.Solid("ThroneVelvet", new Color(0.32f, 0.03f, 0.06f), null, 0.15f);
+        var P = PrimitiveType.Cube;
+        GameAssets.Child(root, P, "Dais1", new Vector3(0, 0.15f, 0), new Vector3(5f, 0.3f, 5.5f), stone, true);
+        GameAssets.Child(root, P, "Dais2", new Vector3(0.4f, 0.45f, 0), new Vector3(3.8f, 0.3f, 4.2f), stone, true);
+        GameAssets.Child(root, P, "Carpet", new Vector3(-3.5f, 0.02f, 0), new Vector3(5f, 0.04f, 1.6f), velvet, false);
+        GameAssets.Child(root, P, "Seat", new Vector3(0.6f, 1.05f, 0), new Vector3(1.6f, 0.9f, 2f), gold, true);
+        GameAssets.Child(root, P, "Cushion", new Vector3(0.5f, 1.55f, 0), new Vector3(1.4f, 0.15f, 1.7f), velvet, false);
+        GameAssets.Child(root, P, "Back", new Vector3(1.35f, 2.9f, 0), new Vector3(0.3f, 4f, 2f), gold, true);
+        GameAssets.Child(root, P, "BackPanel", new Vector3(1.18f, 2.7f, 0), new Vector3(0.06f, 2.6f, 1.4f), velvet, false);
+        GameAssets.Child(root, P, "ArmL", new Vector3(0.5f, 1.85f, 1.05f), new Vector3(1.5f, 0.25f, 0.25f), gold, false);
+        GameAssets.Child(root, P, "ArmR", new Vector3(0.5f, 1.85f, -1.05f), new Vector3(1.5f, 0.25f, 0.25f), gold, false);
+        GameAssets.Child(root, PrimitiveType.Cylinder, "PostL", new Vector3(-0.15f, 1.35f, 1.05f), new Vector3(0.22f, 0.5f, 0.22f), gold, false);
+        GameAssets.Child(root, PrimitiveType.Cylinder, "PostR", new Vector3(-0.15f, 1.35f, -1.05f), new Vector3(0.22f, 0.5f, 0.22f), gold, false);
+        GameAssets.Child(root, PrimitiveType.Sphere, "FinialL", new Vector3(1.35f, 5.05f, 0.85f), Vector3.one * 0.35f, gold, false);
+        GameAssets.Child(root, PrimitiveType.Sphere, "FinialR", new Vector3(1.35f, 5.05f, -0.85f), Vector3.one * 0.35f, gold, false);
+        var crest = GameAssets.Child(root, P, "Crest", new Vector3(1.35f, 5.2f, 0), Vector3.one * 0.5f, gold, false);
+        crest.transform.localRotation = Quaternion.Euler(45, 0, 0);
+        foreach (int side in new[] { 1, -1 })
+        {
+            GameAssets.Child(root, PrimitiveType.Cylinder, "Pillar", new Vector3(1f, 2.5f, side * 3.2f), new Vector3(0.6f, 2.5f, 0.6f), stone, true);
+            var bowl = GameAssets.Child(root, PrimitiveType.Cylinder, "Brazier", new Vector3(1f, 5.1f, side * 3.2f), new Vector3(0.9f, 0.12f, 0.9f), gold, false);
+            var l = new GameObject("ThroneFire").AddComponent<Light>();
+            l.transform.SetParent(root, false);
+            l.transform.localPosition = new Vector3(1f, 5.6f, side * 3.2f);
+            l.type = LightType.Point; l.range = 9f; l.intensity = 2.6f; l.color = new Color(1f, 0.55f, 0.25f);
+            l.gameObject.AddComponent<TorchFlicker>();
         }
     }
 }

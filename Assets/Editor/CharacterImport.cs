@@ -14,7 +14,7 @@ using UnityEngine;
 /// </summary>
 public static class CharacterImport
 {
-    public static readonly string[] Types = { "SkeletonWarrior", "SkeletonArcher", "DarkMage", "CursedBrute", "ForgottenKing", "ChainedHorror", "Overlord" };
+    public static readonly string[] Types = { "SkeletonWarrior", "SkeletonArcher", "DarkMage", "CursedBrute", "ForgottenKing", "ChainedHorror", "Overlord", "Knight" };
 
     [MenuItem("Dungeon Escape/Import Characters")]
     public static void ImportAll()
@@ -25,6 +25,14 @@ public static class CharacterImport
         {
             string dir = "Assets/Characters/" + type;
             if (!AssetDatabase.IsValidFolder(dir)) { report.Append("\n  " + type + ": no model (placeholder)"); continue; }
+
+            // Some downloads (e.g. Mixamo) embed their textures in the FBX: pull them out once.
+            var firstModel = AssetDatabase.FindAssets("t:Model", new[] { dir }).FirstOrDefault();
+            if (firstModel != null && AssetDatabase.FindAssets("t:Texture2D", new[] { dir }).Length == 0)
+            {
+                var mi = (ModelImporter)AssetImporter.GetAtPath(AssetDatabase.GUIDToAssetPath(firstModel));
+                if (mi.ExtractTextures(dir)) AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+            }
 
             foreach (var tg in AssetDatabase.FindAssets("t:Texture2D", new[] { dir }))
             {
@@ -42,6 +50,8 @@ public static class CharacterImport
             string mp = AssetDatabase.GUIDToAssetPath(modelGuid);
             var imp = (ModelImporter)AssetImporter.GetAtPath(mp);
             imp.materialImportMode = ModelImporterMaterialImportMode.ImportStandard;
+            imp.importCameras = false;   // some downloads contain their own camera / lights
+            imp.importLights = false;
             imp.animationType = ModelImporterAnimationType.Human;
             imp.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
             imp.importAnimation = true;
@@ -58,10 +68,12 @@ public static class CharacterImport
 
             // Materials: one URP Lit material per source material, textures matched by name.
             var srcMats = AssetDatabase.LoadAllAssetsAtPath(mp).OfType<Material>().Select(m => m.name).Distinct().ToList();
+            srcMats = srcMats.Select(n => n.EndsWith("_URP") ? n.Substring(0, n.Length - 4) : n).Distinct().ToList();
             if (srcMats.Count == 0)
             {
                 var go = AssetDatabase.LoadAssetAtPath<GameObject>(mp);
-                srcMats = go.GetComponentsInChildren<Renderer>(true).SelectMany(r => r.sharedMaterials).Where(m => m != null).Select(m => m.name).Distinct().ToList();
+                srcMats = go.GetComponentsInChildren<Renderer>(true).SelectMany(r => r.sharedMaterials).Where(m => m != null)
+                    .Select(m => m.name.EndsWith("_URP") ? m.name.Substring(0, m.name.Length - 4) : m.name).Distinct().ToList();
             }
             var texPaths = AssetDatabase.FindAssets("t:Texture2D", new[] { dir }).Select(AssetDatabase.GUIDToAssetPath).ToList();
             foreach (var matName in srcMats)
@@ -102,6 +114,12 @@ public static class CharacterImport
     static string PickTexture(System.Collections.Generic.List<string> paths, string matName, int matCount, bool normal)
     {
         var candidates = paths.Where(p => IsNormal(Path.GetFileNameWithoutExtension(p)) == normal).ToList();
+        if (!normal)
+        {
+            var colour = candidates.Where(p => { var n = Path.GetFileNameWithoutExtension(p).ToLowerInvariant();
+                return !(n.Contains("specular") || n.Contains("metal") || n.Contains("rough") || n.Contains("_ao") || n.Contains("occlusion") || n.Contains("gloss")); }).ToList();
+            if (colour.Count > 0) candidates = colour;
+        }
         if (candidates.Count == 0) return null;
         string key = Sanitize(matName).ToLowerInvariant();
         // Exact-ish match on the material name.

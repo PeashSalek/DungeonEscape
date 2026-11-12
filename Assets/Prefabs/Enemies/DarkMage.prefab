@@ -124,10 +124,10 @@ MonoBehaviour:
   idleTimeAtPoint: 2
   attackRange: 14
   preferredDistance: 10
-  attackDamage: 14
+  attackDamage: 12
   attackWindup: 1
   attackRecovery: 0.6
-  attackCooldown: 2.4
+  attackCooldown: 2.6
   attackRadius: 1.1
   attackKnockback: 0.5
   heavyAttack: 0

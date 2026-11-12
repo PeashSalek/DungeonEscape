@@ -51,6 +51,12 @@ public class Health : MonoBehaviour, IDamageable
     public Func<DamageInfo, bool> DamageFilter;
 
     public event Action<DamageInfo> Damaged;
+
+    /// <summary>Raised for every hit on any Health (used for sparks, damage numbers, health bars).</summary>
+    public static event Action<Health, DamageInfo> AnyDamaged;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics() { AnyDamaged = null; }
     public event Action<float, float> HealthChanged; // current, max
     public event Action Died;
 
@@ -68,6 +74,7 @@ public class Health : MonoBehaviour, IDamageable
         info.amount *= damageTakenMultiplier;
         CurrentHealth = Mathf.Max(0f, CurrentHealth - info.amount);
         Damaged?.Invoke(info);
+        AnyDamaged?.Invoke(this, info);
         HealthChanged?.Invoke(CurrentHealth, maxHealth);
         if (CurrentHealth <= 0f) Die();
     }

@@ -17,6 +17,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Material_2
+    second: {fileID: 2100000, guid: 54e97d56dffe34540899ec284c9850ff, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Material_2_URP
     second: {fileID: 2100000, guid: fd188ebf5ca6e354db5ec464e60e0981, type: 2}
   - first:
@@ -28,6 +33,11 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: _1_-_Default
+    second: {fileID: 2100000, guid: 4b0f1f90e26d92a48956bb9d2ee05a87, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: _1___Default
     second: {fileID: 2100000, guid: 4b0f1f90e26d92a48956bb9d2ee05a87, type: 2}
   - first:
       type: UnityEngine:Material
@@ -74,8 +84,8 @@ ModelImporter:
     importPhysicalCameras: 1
     importVisibility: 1
     importBlendShapes: 1
-    importCameras: 1
-    importLights: 1
+    importCameras: 0
+    importLights: 0
     nodeNameCollisionStrategy: 1
     fileIdsGeneration: 2
     swapUVChannels: 0

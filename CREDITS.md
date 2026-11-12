@@ -11,15 +11,15 @@ All third-party assets below are free and used under their licences. None of the
 
 | Character in game | Asset | Author | Source | Licence |
 | --- | --- | --- | --- | --- |
-| The Knight (player) | Armored knight character | Mixamo (Adobe) | mixamo.com | Mixamo terms (free for projects) |
+| The Knight (player) | Paladin J Nordstrom | Mixamo (Adobe) | https://www.mixamo.com | Mixamo terms (royalty-free for projects) |
 | Skeleton Warrior | Skeleton animated | danielmclogan | https://sketchfab.com/3d-models/9210377c7a514cf6b48a31b9d3991ff3 | CC BY 4.0 |
 | Skeleton Archer | Free Skeleton Warrior Arrow | RosserMan | https://sketchfab.com/3d-models/2a57d9dd2966407c8b8fa753f76e3bdb | CC BY 4.0 |
 | Dark Mage | PBR Shadowkin Mage (Rigged) | ferociousindustries.matthias | https://sketchfab.com/3d-models/7aab96637055455297d158584b1602cd | CC BY 4.0 |
 | Cursed Brute | Zombie | bumstrum | https://sketchfab.com/3d-models/25c230a1e2f2462fa3de298fc8bca30a | CC BY 4.0 |
 | The Forgotten King (boss) | Stelae knight | muru | https://sketchfab.com/3d-models/0a795ae613f2496e955974ca37bf1e94 | CC BY 4.0 |
 | The Chained Horror | Tillagemon Boss Skeleton | Vasian-Digital3D | https://sketchfab.com/3d-models/5c83cdeb86404e63900c1d04f8b391fb | CC BY 4.0 |
-| The Overlord (Trial boss) | Overlord | comandor707 | https://sketchfab.com/3d-models/db9e29cbed184539b01eb1047c0170fd | CC BY 4.0 |
-| Placeholder mannequin / Ghost Merchant | Universal Animation Library 2 mannequin | Quaternius | https://quaternius.com | CC0 |
+| The Overlord (Trial boss) | PBR Shadowkin Mage (Rigged), recoloured crimson and scaled up | ferociousindustries.matthias | https://sketchfab.com/3d-models/7aab96637055455297d158584b1602cd | CC BY 4.0 |
+| Ghost Merchant | Universal Animation Library 2 mannequin | Quaternius | https://quaternius.com | CC0 |
 
 ## Animations
 - Universal Animation Library and Universal Animation Library 2 – Quaternius (CC0). https://quaternius.itch.io/universal-animation-library , https://quaternius.itch.io/universal-animation-library-2
@@ -38,4 +38,4 @@ All third-party assets below are free and used under their licences. None of the
 
 ## Self-made for this project
 Game design, level layouts (text maps in `Assets/Editor/LevelMaps.cs`), story and dialogue, all gameplay code, UI layout,
-the dungeon geometry, props (doors, chests, levers, traps, braziers, shrines) built from simple shapes, and the integration of every asset in Unity.
+the dungeon geometry, props (doors, chests, levers, traps, braziers, shrines, the throne) built from simple shapes, and the integration of every asset in Unity.

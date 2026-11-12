@@ -84,7 +84,7 @@ public class TrialManager : MonoBehaviour
             }
             return;
         }
-        int count = 2 + Wave + Wave / 3;
+        int count = Mathf.RoundToInt(2 + Wave * 0.75f);
         for (int i = 0; i < count; i++)
         {
             int maxType = Mathf.Min(enemyPrefabs.Length, 1 + Wave / 2);
