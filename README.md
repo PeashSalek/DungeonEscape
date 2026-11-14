@@ -30,6 +30,3 @@ Download the Windows build from the Releases / itch.io page, unzip and run `Dung
 - Keys, doors, lever gates, chests, a lock-picking minigame, breakable barrels, spike traps, poison water, swinging blades
 - Curse shrines with random blessings (each with a curse), Ghost Merchant shop and coin economy, power-ups
 - Brazier checkpoints with save/load, intro and ending cinematics with credits, pause menu, rebindable controls
-
-## Credits
-See [CREDITS.md](CREDITS.md).
