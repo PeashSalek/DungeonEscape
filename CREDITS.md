@@ -1,7 +1,7 @@
 # Credits – Dungeon Escape: Curse of the Forgotten King
 
 Game design, level design, story: **Peash Salek**
-Programming: **Peash Salek**, with AI assistance from **Claude (Anthropic)** for C# code, editor build scripts and documentation.
+Programming: **Peash Salek**
 
 Engine: Unity 6.6 (6000.6.3f1), Universal Render Pipeline.
 

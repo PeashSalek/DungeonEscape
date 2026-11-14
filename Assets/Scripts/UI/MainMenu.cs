@@ -10,7 +10,7 @@ public class MainMenu : MonoBehaviour
     public string creditsText =
         "DUNGEON ESCAPE: CURSE OF THE FORGOTTEN KING\n\n" +
         "Game design, levels and story: Peash Salek\n" +
-        "Programming: Peash Salek, with AI assistance from Claude (Anthropic)\n\n" +
+        "Programming: Peash Salek\n\n" +
         "Made with Unity 6 (URP)\n" +
         "Characters and animations: Mixamo (Adobe) and Sketchfab artists (CC BY) - full list in CREDITS.md\n" +
         "Textures: Poly Haven (CC0)\n" +

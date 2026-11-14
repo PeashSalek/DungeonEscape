@@ -32,4 +32,4 @@ Download the Windows build from the Releases / itch.io page, unzip and run `Dung
 - Brazier checkpoints with save/load, intro and ending cinematics with credits, pause menu, rebindable controls
 
 ## Credits
-See [CREDITS.md](CREDITS.md). Code was written with AI assistance (Claude by Anthropic), as stated in the credits and the GDD.
+See [CREDITS.md](CREDITS.md).

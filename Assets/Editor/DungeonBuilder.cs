@@ -280,7 +280,7 @@ public static class DungeonBuilder
     public const string CreditsText =
         "DUNGEON ESCAPE\nCurse of the Forgotten King\n\n\n" +
         "GAME DESIGN, LEVELS & STORY\nPeash Salek\n\n" +
-        "PROGRAMMING\nPeash Salek\nwith AI assistance from Claude (Anthropic)\n\n" +
+        "PROGRAMMING\nPeash Salek\n\n" +
         "ENGINE\nUnity 6 (Universal Render Pipeline)\n\n" +
         "CHARACTERS\nKnight: Mixamo (Adobe)\nEnemy and boss models: Sketchfab artists (CC BY) - see CREDITS.md\n\n" +
         "ANIMATIONS\nUniversal Animation Library 1 & 2 by Quaternius (CC0)\n\n" +
