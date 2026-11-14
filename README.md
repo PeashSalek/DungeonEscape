@@ -33,8 +33,15 @@ Download the Windows build from the Releases / itch.io page, unzip and run `Dung
 
 ## Building from source
 1. Open the project in **Unity 6000.6.3f1**.
-2. Menu **Dungeon Escape → Build All Scenes** regenerates every scene from `Assets/Editor/LevelMaps.cs`.
-3. Menu **Dungeon Escape → Build Windows** makes the player build in `Builds/Windows`.
+2. Add the player model (not included, see below).
+3. Menu **Dungeon Escape → Build All Scenes** regenerates every scene from `Assets/Editor/LevelMaps.cs`.
+4. Menu **Dungeon Escape → Build Windows** makes the player build in `Builds/Windows`.
+
+### Player model (Mixamo, not in this repo)
+The knight is Mixamo's free **Paladin J Nordstrom** character. Adobe's terms don't allow sharing the raw file, so it is excluded.
+To add it: sign in at [mixamo.com](https://www.mixamo.com), search *Paladin J Nordstrom*, download it as **FBX for Unity (.fbx), With Skin**,
+and save it as `Assets/Characters/Knight/Paladin.fbx`. Build All Scenes then imports it and extracts its textures.
+Without it the game still builds and uses a plain mannequin for the knight.
 
 Level layouts are text maps: edit `LevelMaps.cs` and rebuild to change a level.
 

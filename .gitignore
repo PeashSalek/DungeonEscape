@@ -28,3 +28,10 @@ crashlytics-build.properties
 # OS
 .DS_Store
 Thumbs.db
+
+# Mixamo player model: not redistributable, see README
+/Assets/Characters/Knight/
+/Assets/Characters/Knight.meta
+/Assets/Models/Player/
+/Assets/Models/Player.meta
+
